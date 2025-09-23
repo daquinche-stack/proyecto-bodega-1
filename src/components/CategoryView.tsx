@@ -215,7 +215,7 @@ export function CategoryView({ items, onUpdateStock, onEditItem, onDeleteItem, u
         }}
         onAdd={handleAddItem}
         isAdding={isAdding}
-        preselectedCategory={selectedCategory}
+  
       />
     </div>
   );
