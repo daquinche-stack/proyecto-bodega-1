@@ -11,6 +11,7 @@ import { ViewerMode } from './components/ViewerMode';
 import { SearchBar } from './components/SearchBar';
 import { StatsGrid } from './components/StatsGrid';
 import { InventoryItem, NewInventoryItem } from './types/inventory';
+import { AddItemModal } from './components/AddItemModal';
 import { inventoryApi } from './services/api';
 import { searchInventoryItem } from './utils/search';
 
