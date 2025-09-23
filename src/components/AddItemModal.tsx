@@ -290,36 +290,6 @@ export function AddItemModal({ isOpen, onClose, onAdd, isAdding }: AddItemModalP
             )}
           </div>
 
-           {!preselectedCategory && (
-            <div>
-              <label htmlFor="categoria" className="block text-sm font-medium text-slate-700 mb-2">
-Categoría (Opcional)
-              </label>
-              <select
-                id="categoria"
-                value={formData.categoria || ''}
-                onChange={(e) => handleInputChange('categoria', e.target.value)}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-              >
-                <option value="">Seleccionar categoría (opcional)</option>
-                <option value="Tornillería y Fijación">🔩 Tornillería y Fijación</option>
-                <option value="Transmisión">⚡ Transmisión</option>
-                <option value="Lubricantes y Fluidos">💧 Lubricantes y Fluidos</option>
-                <option value="Rodamientos">⚙️ Rodamientos</option>
-                <option value="Sellos y Empaques">🔒 Sellos y Empaques</option>
-                <option value="Filtros">🔍 Filtros</option>
-                <option value="Válvulas y Conexiones">🔧 Válvulas y Conexiones</option>
-                <option value="Equipos Rotativos">🏭 Equipos Rotativos</option>
-                <option value="Eléctricos">⚡ Eléctricos</option>
-                <option value="Tuberías y Mangueras">🚰 Tuberías y Mangueras</option>
-                <option value="Repuestos ERSA">🔴 Repuestos ERSA</option>
-                <option value="Materiales UNBW">🔵 Materiales UNBW</option>
-                <option value="Otros">📦 Otros</option>
-              </select>
-              <p className="mt-1 text-xs text-slate-500">Si no seleccionas, se asignará automáticamente</p>
-            </div>
-          )}
-
           <div className="flex space-x-3 pt-4">
             <button
               type="button"
