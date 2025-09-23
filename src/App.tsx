@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Plus, FileSpreadsheet, Eye, Settings, Trash2 } from 'lucide-react';
 import { Layout } from './components/Layout';
 import { InventoryCard } from './components/InventoryCard';
-import { AddItemModal } from './components/AddItemModal';
 import { EditItemModal } from './components/EditItemModal';
 import { ImportExcelModal } from './components/ImportExcelModal';
 import { ClearAllModal } from './components/ClearAllModal';
