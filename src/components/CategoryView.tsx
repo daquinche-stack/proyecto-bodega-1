@@ -4,6 +4,7 @@ import { InventoryItem } from '../types/inventory';
 import { InventoryCard } from './InventoryCard';
 import { AddItemModal } from './AddItemModal';
 import { NewInventoryItem } from '../types/inventory';
+import { CategoryReassignModal } from './CategoryReassignModal';
 
 interface CategoryViewProps {
   items: InventoryItem[];
@@ -14,6 +15,8 @@ interface CategoryViewProps {
   updatingItems: Set<number>;
   deletingItems: Set<number>;
   isAdding: boolean;
+  onReassignCategory?: (itemId: number, newCategory: string) => void;
+  isReassigning?: boolean;
 }
 
 // Función para determinar la categoría automáticamente
@@ -100,6 +103,10 @@ export function CategoryView({ items, onUpdateStock, onEditItem, onDeleteItem, o
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [isReassignModalOpen, setIsReassignModalOpen] = useState(false);
+  const [itemToReassign, setItemToReassign] = useState<InventoryItem | null>(null);
+  const [currentItemCategory, setCurrentItemCategory] = useState('');
+  const [isReassigning, setIsReassigning] = useState(false);
 
   // Agrupar items por categoría
   const itemsByCategory = items.reduce((acc, item) => {
@@ -131,6 +138,31 @@ export function CategoryView({ items, onUpdateStock, onEditItem, onDeleteItem, o
   const handleAddItem = (item: NewInventoryItem) => {
     const itemWithCategory = { ...item, categoria: selectedCategory };
     onAddItem(itemWithCategory);
+  };
+
+  const handleReassignCategory = (item: InventoryItem, currentCategory: string) => {
+    setItemToReassign(item);
+    setCurrentItemCategory(currentCategory);
+    setIsReassignModalOpen(true);
+  };
+
+  const handleConfirmReassign = async (itemId: number, newCategory: string) => {
+    try {
+      setIsReassigning(true);
+      // Actualizar el item con la nueva categoría
+      const itemToUpdate = items.find(item => item.id === itemId);
+      if (itemToUpdate && onEditItem) {
+        const updatedItem = { ...itemToUpdate, categoria: newCategory };
+        onEditItem(updatedItem);
+      }
+      setIsReassignModalOpen(false);
+      setItemToReassign(null);
+      setCurrentItemCategory('');
+    } catch (error) {
+      console.error('Error reassigning category:', error);
+    } finally {
+      setIsReassigning(false);
+    }
   };
 
   return (
@@ -215,6 +247,7 @@ export function CategoryView({ items, onUpdateStock, onEditItem, onDeleteItem, o
                       onUpdateStock={onUpdateStock}
                       onEditItem={onEditItem}
                       onDeleteItem={onDeleteItem}
+                      onReassignCategory={(item) => handleReassignCategory(item, category)}
                       isUpdating={updatingItems.has(item.id)}
                       isDeleting={deletingItems.has(item.id)}
                     />
@@ -235,7 +268,19 @@ export function CategoryView({ items, onUpdateStock, onEditItem, onDeleteItem, o
         onAdd={handleAddItem}
         isAdding={isAdding}
         preselectedCategory={selectedCategory}
-  
+      />
+
+      <CategoryReassignModal
+        isOpen={isReassignModalOpen}
+        onClose={() => {
+          setIsReassignModalOpen(false);
+          setItemToReassign(null);
+          setCurrentItemCategory('');
+        }}
+        onReassign={handleConfirmReassign}
+        item={itemToReassign}
+        currentCategory={currentItemCategory}
+        isReassigning={isReassigning}
       />
     </div>
   );

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Package, MapPin, Edit3, Check, X, AlertTriangle, Image, Settings, Trash2 } from 'lucide-react';
+import { Package, MapPin, Edit3, Check, X, AlertTriangle, Image, Settings, Trash2, ArrowRight } from 'lucide-react';
 import { InventoryItem } from '../types/inventory';
 
 interface InventoryCardProps {
@@ -7,12 +7,13 @@ interface InventoryCardProps {
   onUpdateStock: (id: number, stock: number) => void;
   onEditItem?: (item: InventoryItem) => void;
   onDeleteItem?: (id: number) => void;
+  onReassignCategory?: (item: InventoryItem) => void;
   isUpdating: boolean;
   isDeleting?: boolean;
   isViewerMode?: boolean;
 }
 
-export function InventoryCard({ item, onUpdateStock, onEditItem, onDeleteItem, isUpdating, isDeleting = false, isViewerMode = false }: InventoryCardProps) {
+export function InventoryCard({ item, onUpdateStock, onEditItem, onDeleteItem, onReassignCategory, isUpdating, isDeleting = false, isViewerMode = false }: InventoryCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [newStock, setNewStock] = useState(item.stock);
 
@@ -146,6 +147,16 @@ export function InventoryCard({ item, onUpdateStock, onEditItem, onDeleteItem, i
               >
                 <Settings className="h-4 w-4" />
                 <span>Editar</span>
+              </button>
+            )}
+            {onReassignCategory && (
+              <button
+                onClick={() => onReassignCategory(item)}
+                className="flex items-center space-x-1 px-2 py-1 text-xs text-purple-600 hover:bg-purple-50 rounded transition-colors"
+                title="Cambiar categoría"
+              >
+                <ArrowRight className="h-4 w-4" />
+                <span>Categoría</span>
               </button>
             )}
             {onDeleteItem && (

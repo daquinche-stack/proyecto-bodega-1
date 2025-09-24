@@ -4,6 +4,7 @@ import { InventoryItem } from '../types/inventory';
 import { inventoryApi } from '../services/api';
 import { AddItemModal } from './AddItemModal';
 import { NewInventoryItem } from '../types/inventory';
+import { CategoryReassignModal } from './CategoryReassignModal';
 
 import { searchInventoryItem } from '../utils/search';
 
@@ -21,6 +22,10 @@ export function ViewerMode({ onBackToEditor }: ViewerModeProps) {
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [isReassignModalOpen, setIsReassignModalOpen] = useState(false);
+  const [itemToReassign, setItemToReassign] = useState<InventoryItem | null>(null);
+  const [currentItemCategory, setCurrentItemCategory] = useState('');
+  const [isReassigning, setIsReassigning] = useState(false);
 
   useEffect(() => {
     loadInventory();
@@ -176,6 +181,32 @@ export function ViewerMode({ onBackToEditor }: ViewerModeProps) {
       console.error('Error adding item:', error);
     } finally {
       setIsAdding(false);
+    }
+  };
+
+  const handleReassignCategory = (item: InventoryItem, currentCategory: string) => {
+    setItemToReassign(item);
+    setCurrentItemCategory(currentCategory);
+    setIsReassignModalOpen(true);
+  };
+
+  const handleConfirmReassign = async (itemId: number, newCategory: string) => {
+    try {
+      setIsReassigning(true);
+      // Actualizar el item con la nueva categoría
+      const itemToUpdate = items.find(item => item.id === itemId);
+      if (itemToUpdate) {
+        const updatedItem = { ...itemToUpdate, categoria: newCategory };
+        await inventoryApi.update(itemId, updatedItem);
+        await loadInventory();
+      }
+      setIsReassignModalOpen(false);
+      setItemToReassign(null);
+      setCurrentItemCategory('');
+    } catch (error) {
+      console.error('Error reassigning category:', error);
+    } finally {
+      setIsReassigning(false);
     }
   };
 
@@ -382,7 +413,16 @@ export function ViewerMode({ onBackToEditor }: ViewerModeProps) {
                         {categoryItems.map(item => {
                           const stockStatus = getStockStatus(item.stock, item);
                           return (
-                            <div key={item.id} className="bg-slate-50 rounded-xl border border-slate-200 p-6 hover:shadow-md transition-shadow duration-200">
+                            <div key={item.id} className="bg-slate-50 rounded-xl border border-slate-200 p-6 hover:shadow-md transition-shadow duration-200 relative">
+                              {/* Botón de reasignar categoría */}
+                              <button
+                                onClick={() => handleReassignCategory(item, category)}
+                                className="absolute top-2 right-2 p-1 text-purple-600 hover:bg-purple-100 rounded-full transition-colors"
+                                title="Cambiar categoría"
+                              >
+                                <ArrowRight className="h-4 w-4" />
+                              </button>
+                              
                               {item.foto && (
                                 <div className="mb-4">
                                   <img
@@ -551,6 +591,19 @@ export function ViewerMode({ onBackToEditor }: ViewerModeProps) {
         onAdd={handleAddItem}
         isAdding={isAdding}
         preselectedCategory={selectedCategory}
+      />
+
+      <CategoryReassignModal
+        isOpen={isReassignModalOpen}
+        onClose={() => {
+          setIsReassignModalOpen(false);
+          setItemToReassign(null);
+          setCurrentItemCategory('');
+        }}
+        onReassign={handleConfirmReassign}
+        item={itemToReassign}
+        currentCategory={currentItemCategory}
+        isReassigning={isReassigning}
       />
     </div>
   );
