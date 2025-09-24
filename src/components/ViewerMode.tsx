@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Package, MapPin, AlertTriangle, Image, Settings, ArrowLeft, List, Grid3X3, ChevronDown, ChevronRight, Wrench, Zap, Cog, Droplets, Layers } from 'lucide-react';
+import { Search, Package, MapPin, AlertTriangle, Image, Settings, ArrowLeft, List, Grid3X3, ChevronDown, ChevronRight, Wrench, Zap, Cog, Droplets, Layers, Plus } from 'lucide-react';
 import { InventoryItem } from '../types/inventory';
 import { inventoryApi } from '../services/api';
+import { AddItemModal } from './AddItemModal';
+import { NewInventoryItem } from '../types/inventory';
 
 import { searchInventoryItem } from '../utils/search';
 
@@ -12,10 +14,13 @@ interface ViewerModeProps {
 export function ViewerMode({ onBackToEditor }: ViewerModeProps) {
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isAdding, setIsAdding] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [stockFilter, setStockFilter] = useState<'all' | 'low' | 'critical'>('all');
   const [currentView, setCurrentView] = useState<'list' | 'categories'>('list');
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState('');
 
   useEffect(() => {
     loadInventory();
@@ -153,6 +158,26 @@ export function ViewerMode({ onBackToEditor }: ViewerModeProps) {
   }, {} as { [key: string]: InventoryItem[] });
 
   const categories = Object.keys(itemsByCategory).sort();
+
+  const handleAddToCategory = (category: string) => {
+    setSelectedCategory(category);
+    setIsAddModalOpen(true);
+  };
+
+  const handleAddItem = async (item: NewInventoryItem) => {
+    try {
+      setIsAdding(true);
+      const itemWithCategory = { ...item, categoria: selectedCategory };
+      await inventoryApi.create(itemWithCategory);
+      await loadInventory();
+      setIsAddModalOpen(false);
+      setSelectedCategory('');
+    } catch (error) {
+      console.error('Error adding item:', error);
+    } finally {
+      setIsAdding(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -336,6 +361,13 @@ export function ViewerMode({ onBackToEditor }: ViewerModeProps) {
                       <div className="text-right text-sm text-slate-500">
                         <div>Total: {categoryItems.reduce((sum, item) => sum + item.stock, 0)}</div>
                       </div>
+                      <button
+                        onClick={() => handleAddToCategory(category)}
+                        className="flex items-center space-x-1 px-2 py-1 text-xs text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                        title={`Agregar material a ${category}`}
+                      >
+                        <Plus className="h-3 w-3" />
+                      </button>
                       {isExpanded ? (
                         <ChevronDown className="h-5 w-5 text-slate-400" />
                       ) : (
@@ -509,6 +541,17 @@ export function ViewerMode({ onBackToEditor }: ViewerModeProps) {
           </div>
         )}
       </main>
+
+      <AddItemModal
+        isOpen={isAddModalOpen}
+        onClose={() => {
+          setIsAddModalOpen(false);
+          setSelectedCategory('');
+        }}
+        onAdd={handleAddItem}
+        isAdding={isAdding}
+        preselectedCategory={selectedCategory}
+      />
     </div>
   );
 }

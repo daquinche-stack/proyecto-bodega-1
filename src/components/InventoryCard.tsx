@@ -128,15 +128,17 @@ export function InventoryCard({ item, onUpdateStock, onEditItem, onDeleteItem, i
           )}
         </div>
 
-        {item.stock <= (item.puntoPedido || 5) && (
+        {!isViewerMode && (
           <div className="flex space-x-1">
-            <button
-              onClick={() => setIsEditing(true)}
-              className="flex items-center space-x-1 px-2 py-1 text-xs text-blue-600 hover:bg-blue-50 rounded transition-colors"
-            >
-              <Edit3 className="h-4 w-4" />
-              <span>Stock</span>
-            </button>
+            {!isEditing && (
+              <button
+                onClick={() => setIsEditing(true)}
+                className="flex items-center space-x-1 px-2 py-1 text-xs text-blue-600 hover:bg-blue-50 rounded transition-colors"
+              >
+                <Edit3 className="h-4 w-4" />
+                <span>Stock</span>
+              </button>
+            )}
             {onEditItem && (
               <button
                 onClick={() => onEditItem(item)}
@@ -163,7 +165,7 @@ export function InventoryCard({ item, onUpdateStock, onEditItem, onDeleteItem, i
           </div>
         )}
 
-        {!isEditing && isViewerMode && (
+        {isViewerMode && (
           <button
             disabled
             className="flex items-center space-x-1 px-3 py-2 text-sm text-slate-400 bg-slate-50 rounded-lg cursor-not-allowed"

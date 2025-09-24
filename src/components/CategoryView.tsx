@@ -96,8 +96,10 @@ const categoryIcons: { [key: string]: React.ComponentType<any> } = {
   'Otros': Package,
 };
 
-export function CategoryView({ items, onUpdateStock, onEditItem, onDeleteItem, updatingItems, deletingItems }: CategoryViewProps) {
+export function CategoryView({ items, onUpdateStock, onEditItem, onDeleteItem, onAddItem, updatingItems, deletingItems, isAdding }: CategoryViewProps) {
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState('');
 
   // Agrupar items por categoría
   const itemsByCategory = items.reduce((acc, item) => {
@@ -120,6 +122,16 @@ export function CategoryView({ items, onUpdateStock, onEditItem, onDeleteItem, u
   };
 
   const categories = Object.keys(itemsByCategory).sort();
+
+  const handleAddToCategory = (category: string) => {
+    setSelectedCategory(category);
+    setIsAddModalOpen(true);
+  };
+
+  const handleAddItem = (item: NewInventoryItem) => {
+    const itemWithCategory = { ...item, categoria: selectedCategory };
+    onAddItem(itemWithCategory);
+  };
 
   return (
     <div className="space-y-6">
@@ -178,6 +190,13 @@ export function CategoryView({ items, onUpdateStock, onEditItem, onDeleteItem, u
                 <div className="text-right text-sm text-slate-500">
                   <div>Total: {categoryItems.reduce((sum, item) => sum + item.stock, 0)}</div>
                 </div>
+                <button
+                  onClick={() => handleAddToCategory(category)}
+                  className="flex items-center space-x-1 px-2 py-1 text-xs text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                  title={`Agregar material a ${category}`}
+                >
+                  <Plus className="h-3 w-3" />
+                </button>
                 {isExpanded ? (
                   <ChevronDown className="h-5 w-5 text-slate-400" />
                 ) : (
@@ -215,6 +234,7 @@ export function CategoryView({ items, onUpdateStock, onEditItem, onDeleteItem, u
         }}
         onAdd={handleAddItem}
         isAdding={isAdding}
+        preselectedCategory={selectedCategory}
   
       />
     </div>
